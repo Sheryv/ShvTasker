@@ -15,17 +15,18 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="10" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="32" />
             <RowDefinition Height="10" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Label Grid.Column="0" Content="Path to source file" HorizontalAlignment="Left" VerticalAlignment="Top" />
-        <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" x:Name="Path" TextWrapping="Wrap" VerticalAlignment="Center"
+        <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" x:Name="Path"  VerticalAlignment="Center"
                  MinWidth="50" Margin="0.4,0,0,-0.4" Height="26" VerticalContentAlignment="Center" />
         <Button Grid.Row="1" Grid.Column="2" Content=" ... " Margin="5,0,0,0" x:Name="ChangePath"/>
-            <Label Grid.Row="3" Grid.Column="0" Content="Separator" HorizontalAlignment="Left" VerticalAlignment="Top" />
-        <TextBox Grid.Row="3" Grid.Column="1" x:Name="Separator" TextWrapping="Wrap" VerticalAlignment="Center"
-                 MinWidth="50" Margin="0.4,0,0,-0.4" Height="26" VerticalContentAlignment="Center" />
-        <CheckBox x:Name="IsRepeat" Grid.Row="5" Grid.ColumnSpan="3" Grid.Column="0" Content="Repeat" IsChecked="true"/>
+        <TextBlock Grid.Row="3" Grid.Column="0" x:Name="SeparatorLabel" Text="Separator&#xA;sd" Margin="5,0.4,0,4.4" Grid.RowSpan="2"  />
+        <TextBox Grid.Row="3" Grid.Column="1" x:Name="Separator"
+                 MinWidth="50" Margin="0" VerticalContentAlignment="Center" AcceptsReturn="True"/>
+        <RadioButton x:Name="IsRepeat" Grid.Row="5" Grid.ColumnSpan="2" Grid.Column="0" Content="Repeat all" IsChecked="true"/>
+        <RadioButton  Grid.Row="5" Grid.ColumnSpan="2" Grid.Column="1" Content="Use first" IsChecked="false"/>
     </Grid>
 </UserControl>

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,72 +19,49 @@ namespace ShTaskerAndBot.Manager
     public class BotManager
     {
         private const int DefaultPeriod = 100;
-
+        private const int ReadChunkMaxSize = 20 * 1024;
 
         private const string LeftMouseBtn = "left";
         private const string RightMouseBtn = "right";
 
         public bool IsWorking { get; private set; }
-        public event Action<Entry> ItemAdded;
-        public event Action<Entry> Started;
-        public event Action<Entry> Stopped;
-        public event Action<int, Entry> ItemRemoved;
+//        public event Action<Entry> ItemAdded;
+//        public event Action<int, Entry> ItemRemoved;
+        public event Action Started;
+        public event Action Stopped;
         public event Action Called;
 
         private readonly Timer timer;
-        private readonly MainWindow w;
-        public List<Entry> Items { get; private set; } = new List<Entry>();
         private IntPtr handle;
         private Process process;
+        private readonly Configuration configuration;
+        private readonly bool limitToActiveWindow;
 
-
-        public BotManager(MainWindow w)
+        public BotManager(Configuration configuration, bool limitToActiveWindow)
         {
-            this.w = w;
+            this.configuration = configuration;
+            this.limitToActiveWindow = limitToActiveWindow;
             timer = new Timer(DefaultPeriod);
             timer.Elapsed += Tick;
         }
 
         private void Tick(object sender, EventArgs args)
         {
+            if (!limitToActiveWindow)
+            {
+                ExecuteAll();
+                return;
+            }
+
             if (!process.HasExited)
             {
                 handle = process.MainWindowHandle;
                 if (handle != null && handle != IntPtr.Zero)
                 {
-
-
-                    //                    if (Items[0].IsMouse)
-                    //                    {
-                    //                        KeySender.PostMeth(handle);
-                    //                    }
-                    //                    else
-                    //                    {
-                    //                        KeySender.SendMeth();
-                    //                    }
-
-
-
                     var winActive = AutoItX.WinActive(handle);
                     if (winActive == 1)
                     {
-                        Console.WriteLine(@"Activ: " + winActive);
-                        foreach (var item in Items)
-                        {
-                           // KeySender.SendMeth(item.Keys);
-                           SendKeys.SendWait(item.Keys);
-                            //                            if (item.IsMouse)
-                            //                            {
-                            //                                AutoItX.MouseClick(item.Btn == MouseBtn.Left ? LeftMouseBtn : RightMouseBtn);
-                            //                            }
-                            //                            else
-                            //                            {
-                            //                                AutoItX.Send(item.Keys);
-                            //                            }
-
-                        }
-                        //                        AutoItX.Send("T");
-                        Called?.Invoke();
+                        ExecuteAll();
                     }
                 }
                 else
@@ -96,14 +75,83 @@ namespace ShTaskerAndBot.Manager
             }
         }
 
-        public void LoadConfig(Configuration c)
+        private void ExecuteAll()
         {
-            c.Items.ForEach(entry =>
+            foreach (var item in configuration.Items)
             {
-                Items.Add(entry);
-                ItemAdded?.Invoke(entry);
-            });
+                if (!item.IsEnabled)
+                {
+                    continue;
+                }
+                switch (item.CmdType)
+                {
+                    case CmdTypes.Key:
+                        ExecuteKeys(item);
+                        break;
+                    case CmdTypes.Mouse:
+                        ExecuteMouse(item);
+                        break;
+                    default:
+                        ExecuteStringList(item);
+                        break;
+                }
+            }
+            Called?.Invoke();
         }
+
+        public void ExecuteKeys(Entry entry)
+        {
+            //            SendKeys.SendWait(entry.Keys);
+            AutoItX.Send(entry.Keys);
+        }
+
+        public void ExecuteMouse(Entry entry)
+        {
+            AutoItX.MouseClick(entry.MouseBtn == MouseBtns.Left ? LeftMouseBtn : RightMouseBtn);
+        }
+
+        public void ExecuteStringList(Entry entry)
+        {
+            if (entry.StringListData == null)
+                entry.StringListData = new StringsListData();
+
+            string toSend = null;
+            if (entry.StringListData.Chunks == null)
+            {
+                try
+                {
+                    int done;
+                    char[] b = new char[ReadChunkMaxSize];
+                    using (var reader = new StreamReader(new FileStream(entry.Path, FileMode.Open)))
+                    {
+                        done = reader.ReadBlock(b, entry.StringListData.ChunkIndex, ReadChunkMaxSize);
+                    }
+                    string s = new string(b, 0, done);
+                    entry.StringListData.Chunks = s.Split(entry.Seperator.ToCharArray());
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show("Error while reading specified text chunk from " + entry.Path + ". Details:\n" + e);
+                    return;
+                }
+            }
+            if (entry.StringListData.ListItemNumer >= entry.StringListData.Chunks.Length)
+            {
+                if (!entry.Repeat)
+                {
+                    Stop();
+                    return;
+                }
+                entry.StringListData.ListItemNumer = 0;
+            }
+
+            toSend = entry.StringListData.Chunks[entry.StringListData.ListItemNumer];
+            entry.StringListData.ListItemNumer++;
+            if (toSend == "")
+                return;
+            AutoItX.Send(toSend);
+        }
+
 
         public bool Start(string processName, int period = DefaultPeriod)
         {
@@ -113,10 +161,11 @@ namespace ShTaskerAndBot.Manager
                 if (p.ProcessName.ToLower().Contains(processName.ToLower()))
                 {
                     process = p;
-                    Console.WriteLine(@"P: " + p);
+//                    Console.WriteLine(@"P: " + p);
                     timer.Interval = period;
                     timer.Start();
                     IsWorking = true;
+                    Started?.Invoke();
                     return true;
                 }
             }
@@ -129,35 +178,7 @@ namespace ShTaskerAndBot.Manager
         {
             IsWorking = false;
             timer.Stop();
-        }
-
-        public Entry Add(string keys)
-        {
-            var entry = new Entry(keys);
-            Items.Add(entry);
-            ItemAdded?.Invoke(entry);
-            return entry;
-        }
-
-        public Entry Add(MouseBtn btn)
-        {
-            var entry = new Entry(btn);
-            Items.Add(entry);
-            ItemAdded?.Invoke(entry);
-            return entry;
-        }
-
-        public void Remove(int id)
-        {
-            for (var i = 0; i < Items.Count; i++)
-            {
-                if (Items[i].Id == id)
-                {
-                    ItemRemoved?.Invoke(id, Items[i]);
-                    Items.RemoveAt(i);
-                    return;
-                }
-            }
+            Stopped?.Invoke();
         }
     }
 }

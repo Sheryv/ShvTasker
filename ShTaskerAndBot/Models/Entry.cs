@@ -3,33 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace ShTaskerAndBot.Models
 {
     public class Entry
     {
-        private static int counter = 0;
-        private string keys;
-        private int period;
-        private MouseBtn btn;
-        private int id;
-        private CmdTypes cmdType;
-        private bool repeat;
-        private string seperator;
-        private string name;
         private string command = null;
+        public static int Counter = 0;
+
+        [JsonIgnore] public StringsListData StringListData;
 
         public string Path { get; set; }
 
-        public string Name
-        {
-            get => name;
-            set
-            {
-                name = value;
-            }
-        }
+        public string Name { get; set; }
 
+        [JsonIgnore]
         public string Command
         {
             get
@@ -38,86 +27,56 @@ namespace ShTaskerAndBot.Models
                     return command;
                 command = Keys;
                 if (CmdType == CmdTypes.Mouse)
-                    command= ">>Mouse: " + Btn;
+                    command= ">>Mouse: " + MouseBtn;
                 if (CmdType == CmdTypes.StringList)
                     command= ">>String: " + Path;
                 return command;
             }
         }
 
+        public bool IsEnabled { get; set; } = true;
 
-        public string Keys
+        public string Keys { get; set; }
+
+        public int Period { get; set; }
+
+        public MouseBtns MouseBtn { get; set; }
+
+        public int Id { get; }
+
+        public CmdTypes CmdType { get; set; }
+
+        public bool Repeat { get; set; }
+
+        public string Seperator { get; set; }
+
+        public Entry(CmdTypes cmdType, string keys, int period, MouseBtns btn, bool repeat, string seperator)
         {
-            get => keys;
-            set => keys = value;
+            Id = Counter;
+            Counter++;
+            this.CmdType = cmdType;
+            this.Keys = keys;
+            
+            this.Period = period;
+            this.MouseBtn = btn;
+            this.Repeat = repeat;
+            this.Seperator = seperator;
         }
 
-        public int Period
-        {
-            get => period;
-            set => period = value;
-        }
-
-        public MouseBtn Btn
-        {
-            get => btn;
-            set => btn = value;
-        }
-
-        public int Id
-        {
-            get => id;
-        }
-
-        public CmdTypes CmdType
-        {
-            get => cmdType;
-            set => cmdType = value;
-        }
-
-        public bool Repeat
-        {
-            get => repeat;
-            set => repeat = value;
-        }
-
-
-        public string Seperator
-        {
-            get => seperator;
-            set => seperator = value;
-        }
-
-        public Entry(CmdTypes cmdType, string keys, int period, MouseBtn btn, bool repeat, string seperator)
-        {
-            id = counter;
-            counter++;
-            this.cmdType = cmdType;
-            this.keys = keys;
-            if (Keys == null)
-            {
-                this.keys = "[Mouse]: " + Btn;
-            }
-            this.period = period;
-            this.btn = btn;
-            this.repeat = repeat;
-            this.seperator = seperator;
-        }
-
-        public Entry(string keys) : this(CmdTypes.Key, keys, 0, MouseBtn.Left, false, null)
+        public Entry(string keys) : this(CmdTypes.Key, keys, 0, MouseBtns.Left, false, null)
         {
 
         }
 
-        public Entry(MouseBtn btn) : this(CmdTypes.Mouse, null, 0, btn, false, null)
+        public Entry(MouseBtns btn) : this(CmdTypes.Mouse, null, 0, btn, false, null)
         {
 
         }
 
         public Entry()
         {
-            id = counter;
-            counter++;
+            Id = Counter;
+            Counter++;
         }
 
         public override string ToString()
@@ -126,7 +85,7 @@ namespace ShTaskerAndBot.Models
         }
     }
 
-    public enum MouseBtn
+    public enum MouseBtns
     {
         Left,
         Right
@@ -137,5 +96,13 @@ namespace ShTaskerAndBot.Models
         Key=0,
         Mouse=1,
         StringList=2
+    }
+
+    public class StringsListData
+    {
+        public int ListItemNumer = 0;
+        public string[] Chunks;
+        public int ChunkIndex = 0;
+        public string PreviousPart;
     }
 }

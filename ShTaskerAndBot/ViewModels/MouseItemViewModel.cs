@@ -9,12 +9,14 @@ namespace ShTaskerAndBot.ViewModels
 {
     public class MouseItemViewModel : IAddItemPage
     {
+        public bool LeftBtn { get; set; } = true;
 
-        private Action<Entry> onAdded;
-        public void WithOnAdded(Action<Entry> onAdded)
+        public Entry FetchEntry()
         {
-            this.onAdded = onAdded;
+            return new Entry()
+            {
+                MouseBtn = LeftBtn ? MouseBtns.Left : MouseBtns.Right
+            };
         }
-
     }
 }

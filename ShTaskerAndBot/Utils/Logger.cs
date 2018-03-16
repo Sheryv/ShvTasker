@@ -107,47 +107,47 @@ namespace ShTaskerAndBot.Utils
     {
         public static void Log(string msg)
         {
-            MainViewModel.Instance.Log.Log(msg);
+            Bootstrapper.Log.Log(msg);
         }
 
         public static void E(string msg)
         {
-            MainViewModel.Instance.Log.E(msg);
+            Bootstrapper.Log.E(msg);
         }
 
 //        public static void E(string msg, BaseOperation op)
 //        {
-//            MainViewModel.Instance.Log.E(msg);
+//            Bootstrapper.Log.E(msg);
 //        }
 
         public static void E(Exception e)
         {
-            MainViewModel.Instance.Log.E(e.ToString());
+            Bootstrapper.Log.E(e.ToString());
         }
 
         public static void D(string msg)
         {
-            MainViewModel.Instance.Log.D(msg);
+            Bootstrapper.Log.D(msg);
         }
 
 //        public static void D(string msg, BaseOperation op)
 //        {
-//            MainViewModel.Instance.Log.D(msg, op);
+//            Bootstrapper.Log.D(msg, op);
 //        }
 //
 //        public static void DirectWrite(string msg, BaseOperation op)
 //        {
-//            MainViewModel.Instance.Log.DirectWriteLine(msg, op);
+//            Bootstrapper.Log.DirectWriteLine(msg, op);
 //        }
 
         public static void Log()
         {
-            MainViewModel.Instance.Log.Log();
+            Bootstrapper.Log.Log();
         }
 
         public static void Log(string msg, object sender)
         {
-            MainViewModel.Instance.Log.Log(msg, sender);
+            Bootstrapper.Log.Log(msg, sender);
         }
     }
 }

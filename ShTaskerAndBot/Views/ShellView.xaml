@@ -13,50 +13,60 @@
         xmlns:cal="http://www.caliburnproject.org"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         Title="{Binding Title}" Height="509.6" Width="370.2">
-<Window.DataContext>
-        <localVMs:ShellViewModel/>
-</Window.DataContext>
-<!--    <Window.CommandBindings >-->
-<!--        <CommandBinding Command="localVMs:MyCommands.CmdFoo" CanExecute="{x:Static localVMs:MyCommands.Cd}" Executed="CommandBinding_OnExecuted">-->
-<!--        </CommandBinding>-->
-<!---->
-<!--        <CommandBinding Command="SaveAs"  />-->
-<!--    </Window.CommandBindings>-->
+    <Window.DataContext>
+        <localVMs:ShellViewModel />
+    </Window.DataContext>
 
     <Window.Resources>
-        <u:CmdTypeToStringConverter x:Key="CmdTypeToStringConverter"/>
+        <u:CmdTypeToStringConverter x:Key="CmdTypeToStringConverter" />
         <ContextMenu x:Key="CmAdd">
-            <MenuItem Header="Keys combination" Command="{Binding AddKeyItemCommand}"/>
-            <MenuItem Header="Mouse click" Command="{Binding AddMouseItemCommand}"/>
-            <MenuItem Header="Defined string list" Command="{Binding AddStringListItemCommand}"/>
-<!--                <i:Interaction.Triggers>-->
-<!--                    <i:EventTrigger EventName="Click">-->
-<!--                        <cal:ActionMessage MethodName="Open2" >-->
-<!--                            <cal:Parameter Value="{Binding ElementName=KeyBinding}"/>-->
-<!--                        </cal:ActionMessage>-->
-<!--                    </i:EventTrigger>-->
-<!--                </i:Interaction.Triggers>-->
+            <MenuItem Header="Keys combination" Command="{Binding AddKeyItemCommand}" />
+            <MenuItem Header="Mouse click" Command="{Binding AddMouseItemCommand}" />
+            <MenuItem Header="Defined string list" Command="{Binding AddStringListItemCommand}" />
         </ContextMenu>
     </Window.Resources>
-
     <Grid>
         <Menu Width="Auto" Height="20" DockPanel.Dock="Top" VerticalAlignment="Top">
             <MenuItem Header="General">
-                <MenuItem Header="Limit to active window" IsCheckable="True" IsChecked="True" />
-                <MenuItem Header="Openn" Command="{Binding CmdBoo}" />
+                <MenuItem Header="Limit to active window" IsCheckable="True" IsChecked="{Binding LimitToActiveWindow}" />
+                <Separator />
+                <MenuItem Header="Save" Command="ApplicationCommands.Save" />
+                <MenuItem Header="Exit" Command="{Binding ExitCommand}" />
             </MenuItem>
         </Menu>
 
-        <ListView x:Name="Items"  Margin="10,86,9.4,59.6" >
-<!--            <ListView.DataContext>-->
-<!--                <model:Entry/>-->
-<!--            </ListView.DataContext>-->
+        <ListView x:Name="Items" Margin="10,86,9.4,59.6" SelectedIndex="{Binding SelectedIndex, Mode=OneWayToSource}">
+            <!--                        <ListView.DataContext>-->
+            <!--                            <model:Entry/>-->
+            <!--                        </ListView.DataContext>-->
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsEnabled}" Value="True">
+                            <Setter Property="Foreground" Value="MidnightBlue" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsEnabled}" Value="False">
+                            <Setter Property="Background" Value="LightGray" />
+                            <Setter Property="Foreground" Value="Gray" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ListView.ItemContainerStyle>
             <ListView.View>
+
                 <GridView>
+                    <GridViewColumn Header="En" Width="28">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox Content="c" Tag="{Binding Id}" IsChecked="{Binding IsEnabled}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
                     <GridViewColumn Header="Id" DisplayMemberBinding="{Binding Id}" />
-                    <GridViewColumn Width="120" Header="Name" DisplayMemberBinding="{Binding Name}" />
-                    <GridViewColumn  Header="T" DisplayMemberBinding="{Binding CmdType, Converter={StaticResource CmdTypeToStringConverter}}"/>
-                    <GridViewColumn Width="200" Header="Command" DisplayMemberBinding="{Binding Command}"/>
+                    <GridViewColumn Width="20" Header="T"
+                                    DisplayMemberBinding="{Binding CmdType, Converter={StaticResource CmdTypeToStringConverter}}" />
+                    <GridViewColumn Width="80" Header="Name" DisplayMemberBinding="{Binding Name}" />
+                    <GridViewColumn Width="200" Header="Command" DisplayMemberBinding="{Binding Command}" />
                 </GridView>
             </ListView.View>
         </ListView>
@@ -75,20 +85,24 @@
                  cal:Message.Attach="[Event PreviewTextInput] = [Action FilterIntervalValue($eventArgs)]" />
         <Label Content="Process" HorizontalAlignment="Left" Margin="10,23,0,0" VerticalAlignment="Top" />
         <Label Content="Interval" HorizontalAlignment="Left" Margin="10,51,0,0" VerticalAlignment="Top" />
-        <Button x:Name="btnAdd"  Content="Add" Margin="10,0,0,34.6" VerticalAlignment="Bottom"
-                HorizontalAlignment="Left" Width="75"  >
-<!--                cal:Message.Attach="[Event Click] = [Action Add($this,$eventArgs)]"-->
-               
+        <Button x:Name="btnAdd" Content="Add" Margin="10,0,0,35" VerticalAlignment="Bottom"
+                HorizontalAlignment="Left" Width="75" Height="19">
+            <!--                cal:Message.Attach="[Event Click] = [Action Add($this,$eventArgs)]"-->
+
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="Click">
-                    <cal:ActionMessage MethodName="Add" >
-                        <cal:Parameter Value="{Binding ElementName=btnAdd}"/>
-                        <cal:Parameter Value="{StaticResource CmAdd}"/>
+                    <cal:ActionMessage MethodName="Add">
+                        <cal:Parameter Value="{Binding ElementName=btnAdd}" />
+                        <cal:Parameter Value="{StaticResource CmAdd}" />
                     </cal:ActionMessage>
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </Button>
-        <Button x:Name="Remove" Content="Remove" Margin="10,0,0,9.6" HorizontalAlignment="Left" Width="75"
+        <Button x:Name="MoveUp" Content="Up" Margin="95,0,0,35" HorizontalAlignment="Left" Width="75"
+                Height="19" VerticalAlignment="Bottom" />
+        <Button x:Name="MoveDown" Content="Down" Margin="95,0,0,10" HorizontalAlignment="Left" Width="75"
+                Height="19" VerticalAlignment="Bottom" />
+        <Button x:Name="Remove" Content="Remove" Margin="10,0,0,10" HorizontalAlignment="Left" Width="75"
                 Height="19" VerticalAlignment="Bottom" />
         <Label x:Name="Processing" Content="." Margin="0,47,9.4,0" VerticalAlignment="Top"
                RenderTransformOrigin="0.688,0.045" HorizontalAlignment="Right" Width="44" FontSize="16"

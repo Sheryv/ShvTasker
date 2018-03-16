@@ -1,77 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using System.Reflection;
 using System.Windows;
-using System.ComponentModel;
-using ShTaskerAndBot.Utils;
-using ShTaskerAndBot.ViewModels;
-using ShTaskerAndBot.Views;
 
 namespace ShTaskerAndBot
 {
     public partial class App : Application
     {
-//        private static readonly ILog Log = log4net.LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        private static MainWindow app;
+        // private bool _contentLoaded;
+        // public void InitializeComponent()
+        // {
+            // if (_contentLoaded)
+            // {
+                // return;
+            // }
+            // _contentLoaded = true;
+            // System.Uri resourceLocater = new System.Uri("/ShTaskerAndBot;component/app.xaml", System.UriKind.Relative);
 
-        private void Application_Startup(object sender, StartupEventArgs e)
-        {
-            Logger Log = new Logger(null, null);
-//            Log.D("Application Startup");
+// #line 1 "..\..\App.xaml"
+            // System.Windows.Application.LoadComponent(this, resourceLocater);
+        // }
 
-            // For catching Global uncaught exception
-            AppDomain currentDomain = AppDomain.CurrentDomain;
-            currentDomain.UnhandledException += new UnhandledExceptionEventHandler(UnhandledExceptionOccured);
 
-            app = new MainWindow();
-            var context = new MainViewModel();
-            context.Log = Log;
-            app.DataContext = context;
-            app.Show();
-            LogMachineDetails();
-            Log.D("Starting App");
+        // public static void Main()
+        // {
+           // Bootstrapper b= new Bootstrapper();
+           // b.Initialize();
+            // App app = new App();
+            // app.InitializeComponent();
+            // app.Run();
+        // }
 
-//            if (e.Args.Length == 1) //make sure an argument is passed
-//            {
-//                Log.D("File type association: " + e.Args[0]);
-//                FileInfo file = new FileInfo(e.Args[0]);
-//                if (file.Exists) //make sure it's actually a file
-//                {
-//                    // Here, add you own code
-//                    // ((MainViewModel)app.DataContext).OpenFile(file.FullName);
-//                }
-//            }
-        }
-
-        static void UnhandledExceptionOccured(object sender, UnhandledExceptionEventArgs args)
-        {
-            // Here change path to the log.txt file
-            var path = "D:\\plik.txt";
-
-            // Show a message before closing application
-            Exception e = (Exception)args.ExceptionObject;
-            MessageBox.Show(
-                "Oops, something went wrong and the application must close."+
-                "If the problem persist, please contact SheryvL.\n"+e.Message+"\n"+e.StackTrace,
-                "Unhandled Error",
-                MessageBoxButton.OK);
-
-        }
-
-        private void LogMachineDetails()
-        {
-            var computer = new Microsoft.VisualBasic.Devices.ComputerInfo();
-
-            string text = "OS: " + computer.OSPlatform + " v" + computer.OSVersion + Environment.NewLine +
-                          computer.OSFullName + Environment.NewLine +
-                          "RAM: " + computer.TotalPhysicalMemory.ToString() + Environment.NewLine +
-                          "Language: " + computer.InstalledUICulture.EnglishName;
-            L.D(text);
-        }
     }
 }

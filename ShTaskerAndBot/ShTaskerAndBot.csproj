@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{99059659-9133-4FA4-A782-CDABF491A107}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <RootNamespace>ShTaskerAndBot</RootNamespace>
     <AssemblyName>ShTaskerAndBot</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
@@ -76,17 +76,17 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
+  	 <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+     <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Views\StringListItemView.xaml.cs">
       <DependentUpon>StringListItemView.xaml</DependentUpon>
     </Compile>
-    <Page Include="Views\About.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\AddItemView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -103,34 +103,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="Manager\BotManager.cs" />
     <Compile Include="Models\Configuration.cs" />
     <Compile Include="Models\Entry.cs" />
-    <Compile Include="Models\SampleModel.cs" />
     <Compile Include="Utils\CommandsContainer.cs" />
     <Compile Include="Utils\Logger.cs" />
     <Compile Include="Utils\RelayCommand.cs" />
-    <Compile Include="Utils\Utils.cs" />
-    <Compile Include="ViewModels\AboutViewModel.cs" />
+    <Compile Include="Utils\Util.cs" />
     <Compile Include="ViewModels\AddItemViewModel.cs" />
     <Compile Include="ViewModels\StringListItemViewModel.cs" />
     <Compile Include="ViewModels\MouseItemViewModel.cs" />
     <Compile Include="ViewModels\KeyItemViewModel.cs" />
-    <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
-    <Compile Include="ViewModels\ViewModelBase.cs" />
-    <Compile Include="Views\About.xaml.cs">
-      <DependentUpon>About.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\AddItemView.xaml.cs">
       <DependentUpon>AddItemView.xaml</DependentUpon>
     </Compile>
@@ -142,10 +127,6 @@
     </Compile>
     <Compile Include="Views\ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
     </Compile>
     <Page Include="Views\StringListItemView.xaml">
       <SubType>Designer</SubType>

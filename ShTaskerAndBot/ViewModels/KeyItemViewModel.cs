@@ -9,11 +9,14 @@ namespace ShTaskerAndBot.ViewModels
 {
     public class KeyItemViewModel : IAddItemPage
     {
+        public string Keys { get; set; }
 
-        private Action<Entry> onAdded;
-        public void WithOnAdded(Action<Entry> onAdded)
+        public Entry FetchEntry()
         {
-            this.onAdded = onAdded;
+            return new Entry()
+            {
+                Keys = Keys,
+            };
         }
 
     }
