@@ -26,19 +26,23 @@ namespace ShTaskerAndBot.Models
                 if (command != null)
                     return command;
                 command = Keys;
-                if (CmdType == CmdTypes.Mouse)
-                    command= ">>Mouse: " + MouseBtn;
+                if (CmdType == CmdTypes.MouseClick)
+                    command = MouseBtn.ToString();
                 if (CmdType == CmdTypes.StringList)
-                    command= ">>String: " + Path;
+                    command = Path;
                 return command;
             }
         }
 
         public bool IsEnabled { get; set; } = true;
 
-        public string Keys { get; set; }
+        public int LoopCount { get; set; } = 0;
 
-        public int Period { get; set; }
+        public int LoopInterval { get; set; } = 0;
+
+        public int InitialDelay { get; set; } = 0;
+
+        public string Keys { get; set; }
 
         public MouseBtns MouseBtn { get; set; }
 
@@ -56,8 +60,7 @@ namespace ShTaskerAndBot.Models
             Counter++;
             this.CmdType = cmdType;
             this.Keys = keys;
-            
-            this.Period = period;
+
             this.MouseBtn = btn;
             this.Repeat = repeat;
             this.Seperator = seperator;
@@ -65,12 +68,10 @@ namespace ShTaskerAndBot.Models
 
         public Entry(string keys) : this(CmdTypes.Key, keys, 0, MouseBtns.Left, false, null)
         {
-
         }
 
-        public Entry(MouseBtns btn) : this(CmdTypes.Mouse, null, 0, btn, false, null)
+        public Entry(MouseBtns btn) : this(CmdTypes.MouseClick, null, 0, btn, false, null)
         {
-
         }
 
         public Entry()
@@ -81,7 +82,12 @@ namespace ShTaskerAndBot.Models
 
         public override string ToString()
         {
-            return $"{Id}. [time {Period}]: {Command}";
+            string s = $"{Id}.> {Command} [Loop:{LoopCount}, Interval:{LoopInterval}, Delay:{InitialDelay}]";
+            if (CmdType == CmdTypes.StringList)
+            {
+                s += $"[Repeat:{Repeat}]";
+            }
+            return s;
         }
     }
 
@@ -93,9 +99,10 @@ namespace ShTaskerAndBot.Models
 
     public enum CmdTypes
     {
-        Key=0,
-        Mouse=1,
-        StringList=2
+        Key = 0,
+        MouseClick = 1,
+        StringList = 2,
+        MouseMove = 3
     }
 
     public class StringsListData

@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Data;
 using System.Windows.Threading;
 using Caliburn.Micro;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using ShTaskerAndBot.Models;
 using Action = System.Action;
 
 namespace ShTaskerAndBot.Utils
@@ -53,33 +49,6 @@ namespace ShTaskerAndBot.Utils
             int ia = list.IndexOf(a);
             list[ia] = list[indexB];
             list[indexB] = a;
-        }
-    }
-
-    public class CmdTypeToStringConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            CmdTypes t = (CmdTypes) value;
-            string s;
-            switch (t)
-            {
-                default:
-                    s = "K";
-                    break;
-                case CmdTypes.Mouse:
-                    s = "M";
-                    break;
-                case CmdTypes.StringList:
-                    s = "S";
-                    break;
-            }
-            return s;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
         }
     }
 }

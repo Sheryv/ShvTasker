@@ -51,7 +51,7 @@ namespace ShTaskerAndBot.ViewModels
                 case CmdTypes.Key:
                     page = new KeyItemViewModel();
                     break;
-                case CmdTypes.Mouse:
+                case CmdTypes.MouseClick:
                     page = new MouseItemViewModel();
                     break;
                 default:

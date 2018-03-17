@@ -10,23 +10,18 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.Reflection;
-
 
 namespace ShTaskerAndBot.Views
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for DetailsView.xaml
     /// </summary>
-    public partial class ShellView
+    public partial class DetailsView : Window
     {
-
-        public ShellView()
+        public DetailsView()
         {
             InitializeComponent();
         }
-
     }
 }

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,6 +23,7 @@ namespace ShTaskerAndBot.ViewModels
     public class ShellViewModel : Screen
     {
         private readonly IWindowManager windowManager;
+        private readonly KeyboardHook keyboardHook;
         private const string WorkingLabel = "Working";
         private const string NotWorkingLabel = "Not working";
         private const string NameOfConfigFile = "config.json";
@@ -41,6 +43,17 @@ namespace ShTaskerAndBot.ViewModels
         public bool LimitToActiveWindow { get; set; } = true;
         public string Title { get; } = "ShTasker&Bot";
         public int SelectedIndex { get; set; }
+
+        public bool GlobalShortcutEnabled
+        {
+            get => Configuration.GlobalShortcutEnabled;
+            set
+            {
+                Configuration.GlobalShortcutEnabled = value;
+                ChangeGlobalShortcutState(value);
+                NotifyOfPropertyChange(() => GlobalShortcutEnabled);
+            }
+        }
 
         public string Processing
         {
@@ -92,6 +105,13 @@ namespace ShTaskerAndBot.ViewModels
             }
         }
 
+
+        public string Shortcut
+        {
+            get => Configuration.Shortcut?.ToString() ?? "";
+        }
+
+
         public BindableCollection<Entry> Items
         {
             get => Configuration?.Items;
@@ -129,6 +149,7 @@ namespace ShTaskerAndBot.ViewModels
         public ShellViewModel(IWindowManager windowManager)
         {
             this.windowManager = windowManager;
+            this.keyboardHook = new KeyboardHook();
             AddKeyItemCommand = new MenuCommand(this, new KeyGesture(Key.D, ModifierKeys.Control));
             AddMouseItemCommand = new MenuCommand(this, new KeyGesture(Key.F, ModifierKeys.Control));
             AddStringListItemCommand = new MenuCommand(this, new KeyGesture(Key.G, ModifierKeys.Control));
@@ -137,6 +158,7 @@ namespace ShTaskerAndBot.ViewModels
             {
                 Items = new BindableCollection<Entry>(),
                 ProcessName = "notepad",
+                Shortcut = new KeyShortcut() { Key = Key.F5},
                 Interval = 250
             };
         }
@@ -147,7 +169,7 @@ namespace ShTaskerAndBot.ViewModels
             var s = GetView() as Window;
             s.CommandBindings.Add(new CommandBinding(AddKeyItemCommand, (sender, args) => Open(CmdTypes.Key),
                 CanExecuteAlwaysTrue));
-            s.CommandBindings.Add(new CommandBinding(AddMouseItemCommand, (sender, args) => Open(CmdTypes.Mouse),
+            s.CommandBindings.Add(new CommandBinding(AddMouseItemCommand, (sender, args) => Open(CmdTypes.MouseClick),
                 CanExecuteAlwaysTrue));
             s.CommandBindings.Add(new CommandBinding(AddStringListItemCommand,
                 (sender, args) => Open(CmdTypes.StringList),
@@ -161,9 +183,11 @@ namespace ShTaskerAndBot.ViewModels
                 try
                 {
                     Configuration = Configuration.Read(NameOfConfigFile);
+                    Configuration.GlobalShortcutEnabled = false;
                     NotifyOfPropertyChange(() => Items);
                     NotifyOfPropertyChange(() => IntervalValue);
                     NotifyOfPropertyChange(() => ProcessName);
+                    NotifyOfPropertyChange(() => GlobalShortcutEnabled);
                 }
                 catch (Exception e)
                 {
@@ -198,6 +222,7 @@ namespace ShTaskerAndBot.ViewModels
                 NotifyOfPropertyChange(() => CanStart);
                 NotifyOfPropertyChange(() => CanStop);
             };
+            Console.WriteLine("MainThread: " + Thread.CurrentThread.ManagedThreadId);
         }
 
         private void CanExecuteAlwaysTrue(object o, CanExecuteRoutedEventArgs canExecuteRoutedEventArgs)
@@ -257,7 +282,7 @@ namespace ShTaskerAndBot.ViewModels
 
         public bool CanMoveUp => SelectedIndex > 0 && SelectedItem != null;
 
-        public bool CanMoveDown => SelectedIndex < Items.Count-1 && SelectedItem != null;
+        public bool CanMoveDown => SelectedIndex < Items.Count - 1 && SelectedItem != null;
 
         public void Open(CmdTypes cmd)
         {
@@ -270,9 +295,64 @@ namespace ShTaskerAndBot.ViewModels
             args.Handled = IsTextAllowed(args.Text);
         }
 
+        public void ShowDetails(MouseButtonEventArgs e)
+        {
+            Console.WriteLine(e.ToString());
+            if (SelectedItem != null)
+            {
+                var d = new DetailsViewModel(Util.ToJson(SelectedItem));
+                windowManager.ShowDialog(d);
+            }
+        }
+
+        public void ShortcutChange()
+        {
+            var v = new KeyInputViewModel(keyShortcut =>
+            {
+                Configuration.Shortcut = keyShortcut;
+                keyboardHook.UnregisterAll();
+                keyboardHook.Register(Configuration.Shortcut, SwapRunningState);
+                NotifyOfPropertyChange(() => Shortcut);
+                if (GlobalShortcutEnabled)
+                {
+                    keyboardHook.Open();
+                }
+                // IsEnabled="{Binding ElementName=GlobalShortcutEnabled, Path=IsChecked}"
+            });
+            keyboardHook.Close();
+            windowManager.ShowDialog(v);
+        }
+
+        private void SwapRunningState()
+        {
+            if (BotManager.IsWorking)
+            {
+                Stop();
+            }
+            else
+            {
+                Start();
+            }
+        }
+
+        private void ChangeGlobalShortcutState(bool enabled)
+        {
+            if (Configuration.Shortcut != null)
+            {
+                if (enabled)
+                {
+                    keyboardHook.Open();
+                }
+                else
+                {
+                    keyboardHook.Close();
+                }
+            }
+        }
+
         private static bool IsTextAllowed(string text)
         {
-            Regex regex = new Regex("[^0-9]+"); 
+            Regex regex = new Regex("[^0-9]+");
             return regex.IsMatch(text);
         }
     }

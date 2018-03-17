@@ -12,13 +12,15 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:cal="http://www.caliburnproject.org"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-        Title="{Binding Title}" Height="509.6" Width="370.2">
+        xmlns:converters="clr-namespace:ShTaskerAndBot.Converters"
+        Title="{Binding Title}" Height="509.6" Width="428">
     <Window.DataContext>
         <localVMs:ShellViewModel />
     </Window.DataContext>
 
     <Window.Resources>
-        <u:CmdTypeToStringConverter x:Key="CmdTypeToStringConverter" />
+        <converters:CmdTypeToStringConverter x:Key="CmdTypeToStringConverter" />
+        <converters:LoopCountConverter x:Key="LoopCountConverter" />
         <ContextMenu x:Key="CmAdd">
             <MenuItem Header="Keys combination" Command="{Binding AddKeyItemCommand}" />
             <MenuItem Header="Mouse click" Command="{Binding AddMouseItemCommand}" />
@@ -33,14 +35,16 @@
                 <MenuItem Header="Save" Command="ApplicationCommands.Save" />
                 <MenuItem Header="Exit" Command="{Binding ExitCommand}" />
             </MenuItem>
+
         </Menu>
 
-        <ListView x:Name="Items" Margin="10,86,9.4,59.6" SelectedIndex="{Binding SelectedIndex, Mode=OneWayToSource}">
-            <!--                        <ListView.DataContext>-->
-            <!--                            <model:Entry/>-->
-            <!--                        </ListView.DataContext>-->
+        <ListView x:Name="Items" Margin="10,86,9.4,59.6" SelectedIndex="{Binding SelectedIndex, Mode=OneWayToSource}" cal:Message.Attach="[Event MouseDoubleClick] = [Action ShowDetails($eventArgs)]">
+            <!--                                    <ListView.DataContext>-->
+            <!--                                        <model:Entry/>-->
+            <!--                                    </ListView.DataContext>-->
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
+
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsEnabled}" Value="True">
                             <Setter Property="Foreground" Value="MidnightBlue" />
@@ -62,29 +66,38 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Id" DisplayMemberBinding="{Binding Id}" />
-                    <GridViewColumn Width="20" Header="T"
-                                    DisplayMemberBinding="{Binding CmdType, Converter={StaticResource CmdTypeToStringConverter}}" />
                     <GridViewColumn Width="80" Header="Name" DisplayMemberBinding="{Binding Name}" />
-                    <GridViewColumn Width="200" Header="Command" DisplayMemberBinding="{Binding Command}" />
+                    <GridViewColumn Width="40" Header="T"
+                                    DisplayMemberBinding="{Binding CmdType, Converter={StaticResource CmdTypeToStringConverter}}" >
+                    </GridViewColumn>
+                    <GridViewColumn Width="120" Header="Command" DisplayMemberBinding="{Binding Command}" />
+                    <GridViewColumn Width="40" Header="Loop"
+                                    DisplayMemberBinding="{Binding LoopCount, Converter={StaticResource LoopCountConverter}}" />
+                    <GridViewColumn Width="40" Header="Interval"
+                                    DisplayMemberBinding="{Binding LoopInterval, Converter={StaticResource LoopCountConverter}}" />
+                    <GridViewColumn Width="40" Header="Init Delay"
+                                    DisplayMemberBinding="{Binding InitialDelay, Converter={StaticResource LoopCountConverter}}" />
+                    <GridViewColumn Header="Id" DisplayMemberBinding="{Binding Id}" />
                 </GridView>
             </ListView.View>
         </ListView>
-        <TextBox x:Name="ProcessName" Height="23" Margin="59,26,93.4,0" TextWrapping="Wrap" Text="mt2"
-                 VerticalAlignment="Top" HorizontalContentAlignment="Right" />
+        <TextBox x:Name="ProcessName" Height="23" Margin="59,26,142.6,0" TextWrapping="Wrap" Text="mt2"
+                 VerticalAlignment="Top" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" />
         <Button x:Name="Start" Content="Start" Margin="0,0,10.4,34.6" HorizontalAlignment="Right" Width="75"
                 Height="20" VerticalAlignment="Bottom" />
         <Button x:Name="Stop" Content="Stop" Margin="0,0,10.4,9.6" HorizontalAlignment="Right" Width="75"
                 Height="19" VerticalAlignment="Bottom" />
-        <Label x:Name="Status" Content="Status" Margin="0,26,9.4,0" VerticalAlignment="Top"
+        <Label x:Name="Status" Content="Status" Margin="0,25,53.6,0" VerticalAlignment="Top"
                RenderTransformOrigin="0.688,0.045" HorizontalAlignment="Right" Width="84"
-               Foreground="{Binding StatusColor}"
-               HorizontalContentAlignment="Right" FontWeight="Bold" />
-        <TextBox x:Name="IntervalValue" Height="23" Margin="59,54,93.4,0" TextWrapping="Wrap" Text="100"
+               Foreground="{Binding StatusColor}" FontWeight="Bold" />
+        <TextBox x:Name="IntervalValue" Height="23" Margin="59,55,300.6,0" TextWrapping="Wrap" Text="100"
                  VerticalAlignment="Top" HorizontalContentAlignment="Right"
-                 cal:Message.Attach="[Event PreviewTextInput] = [Action FilterIntervalValue($eventArgs)]" />
+                 cal:Message.Attach="[Event PreviewTextInput] = [Action FilterIntervalValue($eventArgs)]" VerticalContentAlignment="Center" />
+        <TextBox x:Name="Shortcut" Height="23" Margin="0,55,10.6,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="127"
+                 HorizontalContentAlignment="Right" IsReadOnly="True" Text="23"
+                  VerticalContentAlignment="Center" />
         <Label Content="Process" HorizontalAlignment="Left" Margin="10,23,0,0" VerticalAlignment="Top" />
-        <Label Content="Interval" HorizontalAlignment="Left" Margin="10,51,0,0" VerticalAlignment="Top" />
+        <Label Content="Interval" HorizontalAlignment="Left" Margin="9,53,0,0" VerticalAlignment="Top" />
         <Button x:Name="btnAdd" Content="Add" Margin="10,0,0,35" VerticalAlignment="Bottom"
                 HorizontalAlignment="Left" Width="75" Height="19">
             <!--                cal:Message.Attach="[Event Click] = [Action Add($this,$eventArgs)]"-->
@@ -104,10 +117,12 @@
                 Height="19" VerticalAlignment="Bottom" />
         <Button x:Name="Remove" Content="Remove" Margin="10,0,0,10" HorizontalAlignment="Left" Width="75"
                 Height="19" VerticalAlignment="Bottom" />
-        <Label x:Name="Processing" Content="." Margin="0,47,9.4,0" VerticalAlignment="Top"
-               RenderTransformOrigin="0.688,0.045" HorizontalAlignment="Right" Width="44" FontSize="16"
-               HorizontalContentAlignment="Right" />
-        <Label Content="ms" Margin="0,51,67.4,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="30" />
-
+        <Label x:Name="Processing" Content="-" Margin="0,20,10.6,0" VerticalAlignment="Top"
+               RenderTransformOrigin="0.508,0.177" HorizontalAlignment="Right" Width="38" FontSize="20"
+               HorizontalContentAlignment="Right" Height="31" Background="{x:Null}" Foreground="#FFD60000" Padding="5,2,5,0" />
+        <Label Content="ms" Margin="0,51,270.6,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="30" />
+        <CheckBox x:Name="GlobalShortcutEnabled" Content="On" Margin="0,59,137.6,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="45"/>
+        <Button x:Name="ShortcutChange"  Content="Shortcut" Margin="0,55,190.6,0" VerticalAlignment="Top"
+                 Height="23" HorizontalAlignment="Right" Width="75"/>
     </Grid>
 </Window>

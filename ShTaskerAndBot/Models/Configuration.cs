@@ -13,8 +13,6 @@ namespace ShTaskerAndBot.Models
     public class Configuration
     {
         private BindableCollection<Entry> items;
-        private string processName;
-        private int interval;
 
         public BindableCollection<Entry> Items
         {
@@ -22,17 +20,13 @@ namespace ShTaskerAndBot.Models
             set => items = value;
         }
 
-        public string ProcessName
-        {
-            get => processName;
-            set => processName = value;
-        }
+        public bool GlobalShortcutEnabled { get; set; }
 
-        public int Interval
-        {
-            get => interval;
-            set => interval = value;
-        }
+        public KeyShortcut Shortcut { get; set; }   
+
+        public string ProcessName { get; set; }
+
+        public int Interval { get; set; }
 
         public override string ToString()
         {

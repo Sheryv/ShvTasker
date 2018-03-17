@@ -88,7 +88,7 @@ namespace ShTaskerAndBot.Manager
                     case CmdTypes.Key:
                         ExecuteKeys(item);
                         break;
-                    case CmdTypes.Mouse:
+                    case CmdTypes.MouseClick:
                         ExecuteMouse(item);
                         break;
                     default:

@@ -76,18 +76,38 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-  	 <ApplicationDefinition Include="App.xaml">
+    <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-     <Compile Include="App.xaml.cs">
+    <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Converters\CmdTypeToStringConverter.cs" />
+    <Compile Include="Converters\LoopCountConverter.cs" />
+    <Compile Include="Manager\KeyboardHook.cs" />
+    <Compile Include="Models\KeyShortcut.cs" />
+    <Compile Include="ViewModels\DetailsViewModel.cs" />
+    <Compile Include="ViewModels\KeyInputViewModel.cs" />
+    <Compile Include="Views\DetailsView.xaml.cs">
+      <DependentUpon>DetailsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\KeyInputView.xaml.cs">
+      <DependentUpon>KeyInputView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\StringListItemView.xaml.cs">
       <DependentUpon>StringListItemView.xaml</DependentUpon>
     </Compile>
     <Page Include="Views\AddItemView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DetailsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\KeyInputView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
