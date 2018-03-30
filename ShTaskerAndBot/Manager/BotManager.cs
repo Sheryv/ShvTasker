@@ -13,6 +13,7 @@ using ShTaskerAndBot.Models;
 using ShTaskerAndBot.Views;
 using MessageBox = System.Windows.MessageBox;
 using Timer = System.Timers.Timer;
+using System.Threading;
 
 namespace ShTaskerAndBot.Manager
 {
@@ -25,9 +26,11 @@ namespace ShTaskerAndBot.Manager
         private const string RightMouseBtn = "right";
 
         public bool IsWorking { get; private set; }
+
 //        public event Action<Entry> ItemAdded;
 //        public event Action<int, Entry> ItemRemoved;
         public event Action Started;
+
         public event Action Stopped;
         public event Action Called;
 
@@ -49,7 +52,7 @@ namespace ShTaskerAndBot.Manager
         {
             if (!limitToActiveWindow)
             {
-                ExecuteAll();
+                ExecuteAll(IntPtr.Zero);
                 return;
             }
 
@@ -58,11 +61,7 @@ namespace ShTaskerAndBot.Manager
                 handle = process.MainWindowHandle;
                 if (handle != null && handle != IntPtr.Zero)
                 {
-                    var winActive = AutoItX.WinActive(handle);
-                    if (winActive == 1)
-                    {
-                        ExecuteAll();
-                    }
+                    ExecuteAll(handle);
                 }
                 else
                 {
@@ -75,34 +74,73 @@ namespace ShTaskerAndBot.Manager
             }
         }
 
-        private void ExecuteAll()
+        private void ExecuteAll(IntPtr handle)
         {
-            foreach (var item in configuration.Items)
+            var list = new List<Entry>(configuration.Items);
+            foreach (var item in list)
             {
+                if (!IsWorking)
+                    return;
                 if (!item.IsEnabled)
                 {
                     continue;
                 }
-                switch (item.CmdType)
+                if (item.InitialDelay > 0)
                 {
-                    case CmdTypes.Key:
-                        ExecuteKeys(item);
-                        break;
-                    case CmdTypes.MouseClick:
-                        ExecuteMouse(item);
-                        break;
-                    default:
-                        ExecuteStringList(item);
-                        break;
+                    Thread.Sleep(item.InitialDelay);
                 }
+                if (!IsWorking)
+                    return;
+                int winActive = 0;
+                for (int i = 0; i < item.LoopCount; i++)
+                {
+                    if (!IsWorking)
+                        return;
+                    winActive = AutoItX.WinActive(handle);
+                    if (winActive == 1)
+                    {
+                        switch (item.CmdType)
+                        {
+                            case CmdTypes.Key:
+                                ExecuteKeys(item);
+                                break;
+                            case CmdTypes.MouseClick:
+                                ExecuteMouse(item);
+                                break;
+                            default:
+                                ExecuteStringList(item);
+                                break;
+                        }
+                    }
+                    if (item.LoopInterval > 0 && i < item.LoopCount-1)
+                    {
+                        Thread.Sleep(item.LoopInterval);
+                    }
+                    if (!IsWorking)
+                        return;
+                }
+                if (winActive == 1)
+                    Called?.Invoke();
             }
-            Called?.Invoke();
         }
 
         public void ExecuteKeys(Entry entry)
         {
             //            SendKeys.SendWait(entry.Keys);
-            AutoItX.Send(entry.Keys);
+            if (configuration.UseBuiltinSendWait)
+            {
+                try
+                {
+                SendKeys.SendWait(entry.Keys);
+                }
+                catch
+                {
+                }
+            }
+            else
+            {
+                AutoItX.Send(entry.Keys);
+            }
         }
 
         public void ExecuteMouse(Entry entry)
@@ -149,12 +187,38 @@ namespace ShTaskerAndBot.Manager
             entry.StringListData.ListItemNumer++;
             if (toSend == "")
                 return;
-            AutoItX.Send(toSend);
+            if (configuration.UseBuiltinSendWait)
+            {
+                SendKeys.SendWait(toSend);
+            }
+            else
+            {
+                AutoItX.Send(toSend);
+            }
         }
 
 
         public bool Start(string processName, int period = DefaultPeriod)
         {
+            int time = 0;
+            foreach (var item in configuration.Items)
+            {
+                if(!item.IsEnabled)
+                    continue;
+                time += item.InitialDelay;
+                if (item.LoopCount > 0)
+                {
+                    time += (item.LoopCount - 1) * item.LoopInterval;
+                }
+            }
+            if (time > configuration.Interval)
+            {
+                Utils.Util.MsgErr(
+                    $"Duration of sequence cannot be longer than execution interval value! Current duration is " +
+                    $"{time} and is too long by {(time - configuration.Interval)}\nRecommended value is {time + 10}");
+                return false;
+            }
+
             var procId = Process.GetProcesses();
             foreach (var p in procId)
             {

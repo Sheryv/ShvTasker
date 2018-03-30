@@ -68,14 +68,24 @@ namespace ShTaskerAndBot.ViewModels
                 Util.MsgErr("Separator cannot be empty");
                 return null;
             }
-
-            return new Entry()
+            if (entry == null)
             {
-                Path = Path,
-                Seperator = Separator,
-                Repeat = IsRepeat
-            };
+                entry = new Entry();
+            }
+            entry.Path = Path;
+            entry.Seperator = Separator;
+            entry.Repeat = IsRepeat;
+            return entry;
         }
 
+
+        private Entry entry;
+        public void Init(Entry e)
+        {
+            this.entry = e;
+            Path = e.Path;
+            Separator = e.Seperator;
+            IsRepeat = e.Repeat;
+        }
     }
 }

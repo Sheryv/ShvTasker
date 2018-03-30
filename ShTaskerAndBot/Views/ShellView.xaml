@@ -31,6 +31,9 @@
         <Menu Width="Auto" Height="20" DockPanel.Dock="Top" VerticalAlignment="Top">
             <MenuItem Header="General">
                 <MenuItem Header="Limit to active window" IsCheckable="True" IsChecked="{Binding LimitToActiveWindow}" />
+                <MenuItem Header="Use builtin SendWait function" IsCheckable="True"
+                          IsChecked="{Binding UseBuiltinSendWait}" />
+                <MenuItem Header="Reset counters for string lists" Command="{Binding ResetCountersCommand}" />
                 <Separator />
                 <MenuItem Header="Save" Command="ApplicationCommands.Save" />
                 <MenuItem Header="Exit" Command="{Binding ExitCommand}" />
@@ -38,13 +41,14 @@
 
         </Menu>
 
-        <ListView x:Name="Items" Margin="10,86,9.4,59.6" SelectedIndex="{Binding SelectedIndex, Mode=OneWayToSource}" cal:Message.Attach="[Event MouseDoubleClick] = [Action ShowDetails($eventArgs)]">
-            <!--                                    <ListView.DataContext>-->
-            <!--                                        <model:Entry/>-->
-            <!--                                    </ListView.DataContext>-->
+        <ListView x:Name="Items" Margin="10,86,9.4,59.6" SelectedIndex="{Binding SelectedIndex, Mode=OneWayToSource}"
+                  cal:Message.Attach="[Event MouseDoubleClick] = [Action DoubleClick($eventArgs)]">
+<!--                                                <ListView.DataContext>-->
+<!--                                                    <model:Entry/>-->
+<!--                                                </ListView.DataContext>-->
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
-
+                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=OneWayToSource}" />
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsEnabled}" Value="True">
                             <Setter Property="Foreground" Value="MidnightBlue" />
@@ -68,8 +72,7 @@
                     </GridViewColumn>
                     <GridViewColumn Width="80" Header="Name" DisplayMemberBinding="{Binding Name}" />
                     <GridViewColumn Width="40" Header="T"
-                                    DisplayMemberBinding="{Binding CmdType, Converter={StaticResource CmdTypeToStringConverter}}" >
-                    </GridViewColumn>
+                                    DisplayMemberBinding="{Binding CmdType, Converter={StaticResource CmdTypeToStringConverter}}" />
                     <GridViewColumn Width="120" Header="Command" DisplayMemberBinding="{Binding Command}" />
                     <GridViewColumn Width="40" Header="Loop"
                                     DisplayMemberBinding="{Binding LoopCount, Converter={StaticResource LoopCountConverter}}" />
@@ -92,10 +95,12 @@
                Foreground="{Binding StatusColor}" FontWeight="Bold" />
         <TextBox x:Name="IntervalValue" Height="23" Margin="59,55,300.6,0" TextWrapping="Wrap" Text="100"
                  VerticalAlignment="Top" HorizontalContentAlignment="Right"
-                 cal:Message.Attach="[Event PreviewTextInput] = [Action FilterIntervalValue($eventArgs)]" VerticalContentAlignment="Center" />
-        <TextBox x:Name="Shortcut" Height="23" Margin="0,55,10.6,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="127"
+                 cal:Message.Attach="[Event PreviewTextInput] = [Action FilterIntervalValue($eventArgs)]"
+                 VerticalContentAlignment="Center" />
+        <TextBox x:Name="Shortcut" Height="23" Margin="0,55,10.6,0" VerticalAlignment="Top" HorizontalAlignment="Right"
+                 Width="127"
                  HorizontalContentAlignment="Right" IsReadOnly="True" Text="23"
-                  VerticalContentAlignment="Center" />
+                 VerticalContentAlignment="Center" />
         <Label Content="Process" HorizontalAlignment="Left" Margin="10,23,0,0" VerticalAlignment="Top" />
         <Label Content="Interval" HorizontalAlignment="Left" Margin="9,53,0,0" VerticalAlignment="Top" />
         <Button x:Name="btnAdd" Content="Add" Margin="10,0,0,35" VerticalAlignment="Bottom"
@@ -119,10 +124,16 @@
                 Height="19" VerticalAlignment="Bottom" />
         <Label x:Name="Processing" Content="-" Margin="0,20,10.6,0" VerticalAlignment="Top"
                RenderTransformOrigin="0.508,0.177" HorizontalAlignment="Right" Width="38" FontSize="20"
-               HorizontalContentAlignment="Right" Height="31" Background="{x:Null}" Foreground="#FFD60000" Padding="5,2,5,0" />
+               HorizontalContentAlignment="Right" Height="31" Background="{x:Null}" Foreground="#FFD60000"
+               Padding="5,2,5,0" />
         <Label Content="ms" Margin="0,51,270.6,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="30" />
-        <CheckBox x:Name="GlobalShortcutEnabled" Content="On" Margin="0,59,137.6,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="45"/>
-        <Button x:Name="ShortcutChange"  Content="Shortcut" Margin="0,55,190.6,0" VerticalAlignment="Top"
-                 Height="23" HorizontalAlignment="Right" Width="75"/>
+        <CheckBox x:Name="GlobalShortcutEnabled" Content="On" Margin="0,59,137.6,0" VerticalAlignment="Top"
+                  HorizontalAlignment="Right" Width="45" />
+        <Button x:Name="ShortcutChange" Content="Shortcut" Margin="0,55,190.6,0" VerticalAlignment="Top"
+                Height="23" HorizontalAlignment="Right" Width="75" />
+        <Button x:Name="Edit" Content="Edit" Margin="180,0,0,35" HorizontalAlignment="Left" Width="75"
+                Height="19" VerticalAlignment="Bottom" />
+        <Button x:Name="ShowDetails" Content="Details" Margin="180,0,0,10" HorizontalAlignment="Left" Width="75"
+                Height="19" VerticalAlignment="Bottom" />
     </Grid>
 </Window>

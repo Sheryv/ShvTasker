@@ -3,20 +3,40 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Caliburn.Micro;
 using ShTaskerAndBot.Models;
 
 namespace ShTaskerAndBot.ViewModels
 {
-    public class MouseItemViewModel : IAddItemPage
+    public class MouseItemViewModel : Screen, IAddItemPage
     {
-        public bool LeftBtn { get; set; } = true;
+        public bool LeftBtn
+        {
+            get => leftBtn;
+            set
+            {
+                leftBtn = value;
+                NotifyOfPropertyChange(() => LeftBtn);
+            }
+        }
 
         public Entry FetchEntry()
         {
-            return new Entry()
+            if (entry == null)
             {
-                MouseBtn = LeftBtn ? MouseBtns.Left : MouseBtns.Right
-            };
+                entry = new Entry();
+            }
+            entry.MouseBtn = LeftBtn ? MouseBtns.Left : MouseBtns.Right;
+            return entry;
+        }
+
+        private Entry entry;
+        private bool leftBtn = true;
+
+        public void Init(Entry e)
+        {
+            this.entry = e;
+            LeftBtn = e.MouseBtn == MouseBtns.Left;
         }
     }
 }

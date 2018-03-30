@@ -84,6 +84,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Converters\BoolToVisbilityConverter.cs" />
     <Compile Include="Converters\CmdTypeToStringConverter.cs" />
     <Compile Include="Converters\LoopCountConverter.cs" />
     <Compile Include="Manager\KeyboardHook.cs" />

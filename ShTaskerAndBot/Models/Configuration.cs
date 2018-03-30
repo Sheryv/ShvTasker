@@ -22,6 +22,8 @@ namespace ShTaskerAndBot.Models
 
         public bool GlobalShortcutEnabled { get; set; }
 
+        public bool UseBuiltinSendWait { get; set; } = true;
+
         public KeyShortcut Shortcut { get; set; }   
 
         public string ProcessName { get; set; }

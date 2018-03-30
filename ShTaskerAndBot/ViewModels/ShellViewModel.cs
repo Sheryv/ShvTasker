@@ -44,6 +44,14 @@ namespace ShTaskerAndBot.ViewModels
         public string Title { get; } = "ShTasker&Bot";
         public int SelectedIndex { get; set; }
 
+
+        public bool UseBuiltinSendWait
+        {
+            get => Configuration.UseBuiltinSendWait;
+            set { Configuration.UseBuiltinSendWait = value; }
+        }
+
+
         public bool GlobalShortcutEnabled
         {
             get => Configuration.GlobalShortcutEnabled;
@@ -100,7 +108,7 @@ namespace ShTaskerAndBot.ViewModels
             get => Configuration?.Interval.ToString();
             set
             {
-                Configuration.Interval = Convert.ToInt32(value);
+                Configuration.Interval = string.IsNullOrWhiteSpace(value) || value == "" ? 0 : Convert.ToInt32(value);
                 NotifyOfPropertyChange(() => IntervalValue);
             }
         }
@@ -132,6 +140,8 @@ namespace ShTaskerAndBot.ViewModels
                 NotifyOfPropertyChange(() => CanRemove);
                 NotifyOfPropertyChange(() => CanMoveDown);
                 NotifyOfPropertyChange(() => CanMoveUp);
+                NotifyOfPropertyChange(() => CanEdit);
+                NotifyOfPropertyChange(() => CanShowDetails);
             }
         }
 
@@ -139,6 +149,7 @@ namespace ShTaskerAndBot.ViewModels
         public MenuCommand AddKeyItemCommand { get; set; }
         public MenuCommand AddStringListItemCommand { get; set; }
         public MenuCommand ExitCommand { get; set; }
+        public MenuCommand ResetCountersCommand { get; set; }
 
 
         public ShellViewModel() : this(new WindowManager())
@@ -154,11 +165,12 @@ namespace ShTaskerAndBot.ViewModels
             AddMouseItemCommand = new MenuCommand(this, new KeyGesture(Key.F, ModifierKeys.Control));
             AddStringListItemCommand = new MenuCommand(this, new KeyGesture(Key.G, ModifierKeys.Control));
             ExitCommand = new MenuCommand(this, new KeyGesture(Key.Q, ModifierKeys.Control));
+            ResetCountersCommand = new MenuCommand(this, new KeyGesture(Key.R, ModifierKeys.Control));
             Configuration = new Configuration()
             {
                 Items = new BindableCollection<Entry>(),
                 ProcessName = "notepad",
-                Shortcut = new KeyShortcut() { Key = Key.F5},
+                Shortcut = new KeyShortcut() {Key = Key.F5},
                 Interval = 250
             };
         }
@@ -178,6 +190,8 @@ namespace ShTaskerAndBot.ViewModels
                 CanSaveConfiguration));
             s.CommandBindings.Add(new CommandBinding(ExitCommand, (sender, args) => TryClose(),
                 CanExecuteAlwaysTrue));
+            s.CommandBindings.Add(new CommandBinding(ResetCountersCommand, ResetCounters,
+                (sender, args) => args.CanExecute = SelectedItem != null));
             if (File.Exists(NameOfConfigFile))
             {
                 try
@@ -284,6 +298,29 @@ namespace ShTaskerAndBot.ViewModels
 
         public bool CanMoveDown => SelectedIndex < Items.Count - 1 && SelectedItem != null;
 
+        public bool CanEdit => SelectedItem != null;
+        public bool CanShowDetails => SelectedItem != null;
+
+        public void Edit()
+        {
+            //; [Event MouseRightButtonDown] = [Action ShowDetails($eventArgs)]
+            var add = new AddItemViewModel(SelectedItem, entry =>
+            {
+                Items.Refresh();
+//                NotifyOfPropertyChange(() => Items);
+            });
+            windowManager.ShowDialog(add);
+        }
+
+        public void DoubleClick(MouseButtonEventArgs e)
+        {
+            if (SelectedItem != null)
+            {
+                Edit();
+            }
+        }
+
+
         public void Open(CmdTypes cmd)
         {
             var add = new AddItemViewModel(cmd, entry => { Items.Add(entry); });
@@ -292,12 +329,11 @@ namespace ShTaskerAndBot.ViewModels
 
         public void FilterIntervalValue(TextCompositionEventArgs args)
         {
-            args.Handled = IsTextAllowed(args.Text);
+            args.Handled = Util.IsTextNumber(args.Text);
         }
 
-        public void ShowDetails(MouseButtonEventArgs e)
+        public void ShowDetails()
         {
-            Console.WriteLine(e.ToString());
             if (SelectedItem != null)
             {
                 var d = new DetailsViewModel(Util.ToJson(SelectedItem));
@@ -323,6 +359,19 @@ namespace ShTaskerAndBot.ViewModels
             windowManager.ShowDialog(v);
         }
 
+        private void ResetCounters(object sender, ExecutedRoutedEventArgs args)
+        {
+            var s = Items;
+            foreach (var item in Items)
+            {
+                if (item.IsSelected && item.CmdType == CmdTypes.StringList)
+                {
+                    item.StringListData.ListItemNumer = 0;
+                    item.StringListData.ChunkIndex = 0;
+                }
+            }
+        }
+
         private void SwapRunningState()
         {
             if (BotManager.IsWorking)
@@ -334,6 +383,7 @@ namespace ShTaskerAndBot.ViewModels
                 Start();
             }
         }
+
 
         private void ChangeGlobalShortcutState(bool enabled)
         {
@@ -348,12 +398,6 @@ namespace ShTaskerAndBot.ViewModels
                     keyboardHook.Close();
                 }
             }
-        }
-
-        private static bool IsTextAllowed(string text)
-        {
-            Regex regex = new Regex("[^0-9]+");
-            return regex.IsMatch(text);
         }
     }
 }

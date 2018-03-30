@@ -4,22 +4,54 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ShTaskerAndBot.Views"
+        xmlns:mv="clr-namespace:ShTaskerAndBot.ViewModels"
+        xmlns:cal="http://www.caliburnproject.org"
+        xmlns:converters="clr-namespace:ShTaskerAndBot.Converters"
         mc:Ignorable="d"
-        Title="Add new command" Height="223.2" Width="300">
-
+        Title="{Binding Title}" Height="284" Width="300">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Window.Resources>
+    <Window.DataContext>
+        <mv:AddItemViewModel/>
+    </Window.DataContext>
     <StackPanel>
-        <Grid Margin="0,0,0,20">
-            <Label Content="Name" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" />
-            <TextBox x:Name="EntryName" Height="23" Margin="53,14,89.6,0" TextWrapping="Wrap" Text="Cmd"
-                     VerticalAlignment="Top" />
-            <Button x:Name="Add" Content="Add" Margin="0,14,9.6,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="75"
+        <Grid Margin="0,0,-0.4,10" Height="96">
+            <Label Content="Name" HorizontalAlignment="Left" Margin="5,12,0,0" VerticalAlignment="Top" Width="42" />
+            <TextBox x:Name="EntryName" Height="23" Margin="47,14,96,0" TextWrapping="Wrap" Text="Cmd"
+                     VerticalAlignment="Top" VerticalContentAlignment="Center" />
+            <Button x:Name="Add" Content="Add" Margin="0,14,9,0" VerticalAlignment="Top" HorizontalAlignment="Right"
+                    Width="82"
                     Height="22" />
+            <Button x:Name="Edit" Content="Edit" Margin="0,14,10,0" VerticalAlignment="Top" HorizontalAlignment="Right"
+                    Width="81"
+                    Height="22" Visibility="{Binding Path=IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <TextBox x:Name="LoopCount" Height="23" Margin="47,42,202,0" TextWrapping="Wrap" Text="0"
+                     cal:Message.Attach="[Event PreviewTextInput] = [Action FilterValue($eventArgs)]"
+                     VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" />
+            <Label Content="Loop" HorizontalAlignment="Left" Margin="5,41,0,0" VerticalAlignment="Top" Width="42"
+                   Padding="5,4,5,5" />
+            <Label Content="times, with period" Margin="0,41,91,0" VerticalAlignment="Top" Padding="5,4,5,5"
+                   HorizontalAlignment="Right" Width="111" />
+            <TextBox x:Name="LoopInterval" Height="23" Margin="0,42,27,0" TextWrapping="Wrap" Text="0"
+                     cal:Message.Attach="[Event PreviewTextInput] = [Action FilterValue($eventArgs)]"
+                     VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"
+                     HorizontalAlignment="Right" Width="64" />
+            <Label Content="ms" HorizontalAlignment="Right" Margin="0,42,9,0" VerticalAlignment="Top" Width="18"
+                   Padding="2,4,0,5" Height="25" />
+            <Label Content="Initial delay" HorizontalAlignment="Left" Margin="5,68,0,0" VerticalAlignment="Top"
+                   Width="87" />
+            <TextBox x:Name="InitialDelay" Height="23" Margin="92,71,27,0" TextWrapping="Wrap" Text="0"
+                     cal:Message.Attach="[Event PreviewTextInput] = [Action FilterValue($eventArgs)]"
+                     VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" />
+            <Label Content="ms" HorizontalAlignment="Right" Margin="0,71,9,0" VerticalAlignment="Top" Width="18"
+                   Padding="2,4,0,5" Height="25" />
 
 
         </Grid>
-            <ContentControl x:Name="ActiveItem" Margin="10,0,9.6,0"/>
-            
-            
+        <ContentControl x:Name="ActiveItem" Margin="10,0,9.6,0" />
+
+
         <!--        <Grid>-->
         <!--            <TextBox x:Name="TbKeys" HorizontalAlignment="Left" Height="23" Margin="89,13,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="212"/>-->
         <!--            <Label Content="Text to send" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>-->
@@ -32,4 +64,3 @@
     </StackPanel>
 
 </Window>
-

@@ -14,6 +14,9 @@ namespace ShTaskerAndBot.Models
 
         [JsonIgnore] public StringsListData StringListData;
 
+        [JsonIgnore]
+        public bool IsSelected { get; set; }
+
         public string Path { get; set; }
 
         public string Name { get; set; }
@@ -88,6 +91,11 @@ namespace ShTaskerAndBot.Models
                 s += $"[Repeat:{Repeat}]";
             }
             return s;
+        }
+
+        public void ResetCache()
+        {
+            command = null;
         }
     }
 
